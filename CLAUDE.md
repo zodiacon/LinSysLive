@@ -25,6 +25,12 @@ to look at a change without a person at the screen. `--tab N` shows a tab (0 Pro
 (and remove the file after: it's the app's settings). Load to
 see: CPU from `sh -c 'while :; do :; done'`, disk from `dd ... oflag=direct` to a file under `~` (`/tmp` is tmpfs in WSL).
 
+Run as root (`sudo`, to see every process's files and sockets): sudo keeps only `DISPLAY`, so Qt would use X11 through
+XWayland, where WSLg's mouse pointer is invisible over the window. `main.cpp` (`UseInvokingUsersWayland`) points
+`WAYLAND_DISPLAY` at `/run/user/$SUDO_UID/wayland-0` (or `PKEXEC_UID`'s) when it's there and no platform was chosen.
+Root's settings are its own (`/root/.config`). To test without a password: `wsl -u root` with
+`env -i DISPLAY=:0 HOME=/root SUDO_UID=1000 ...`.
+
 CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14, libsystemd-dev and its Qt (6.4, so don't use newer
 Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
 `QT_QPA_PLATFORM=offscreen`.
