@@ -17,6 +17,10 @@ public:
 	static QByteArray ProcessesHeader() { return Value("Processes/Header").toByteArray(); }
 	static void SetProcessesHeader(const QByteArray& state) { SetValue("Processes/Header", state); }
 
+	// the Performance tab's selected page: "cpu", "memory", "disk:sda", "net:eth0"
+	static QString PerformancePage() { return Value("Performance/Page", "cpu").toString(); }
+	static void SetPerformancePage(const QString& key) { SetValue("Performance/Page", key); }
+
 	static QByteArray WindowGeometry() { return Value("Window/Geometry").toByteArray(); }
 	static void SetWindowGeometry(const QByteArray& state) { SetValue("Window/Geometry", state); }
 	static int ActiveTab() { return Value("Window/ActiveTab", 0).toInt(); }

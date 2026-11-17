@@ -15,13 +15,20 @@ shows the window. From Windows:
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build -G Ninja && cmake --build build"
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/Tests"        # Tests Live / Tests -Live, as WinSysLive's
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive"
-wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --screenshot /tmp/shot.png"
+wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screenshot /tmp/shot.png"
 ```
 
 `--screenshot file` saves the window as an image after three refreshes and exits without saving settings: the way
-to look at a change without a person at the screen.
+to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance). To show a
+Performance page, write `[Performance]` `Page=disk:sdd` to `~/.config/ScorpioSoftware/LinSysLive.conf` first. Load to
+see: CPU from `sh -c 'while :; do :; done'`, disk from `dd ... oflag=direct` to a file under `~` (`/tmp` is tmpfs in WSL).
 
-- `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`), linked by the app and the tests.
+CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14 and its Qt (6.4, so don't use newer
+Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
+`QT_QPA_PLATFORM=offscreen`.
+
+- `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`), linked by the
+  app and the tests.
 - `linsyslive`: the window and the views.
 - `Tests`: LinSys's runner (`linsys/Tests/TestFramework.h` and `Main.cpp`: `TEST`, `CHECK`, `CHECK_EQ`) and its fake
   `/proc` (`linsys/Tests/FakeProc.h`). Tests with "Live" in their names read the live system.
@@ -46,10 +53,23 @@ to look at a change without a person at the screen.
   `ProcessInfoEx`. Sorting and filtering are a `QSortFilterProxyModel`'s (`SortRole` gives raw values; recursive
   filtering keeps a match's ancestors). The tests put `QAbstractItemModelTester` on the model and on a sorting proxy;
   keep them passing after any change to how rows change, and add a scenario for a new kind of change.
-- `Format`: values as the views show them (sizes, CPU, states, times), tested.
+- **PerformanceView** (WinSysLive's Performance view): a navigation list (`NavItem`: a compact graph, a title and a
+  value) and a page per device in a `QStackedWidget`: CPU (overall with kernel time, a small graph per processor,
+  processes, threads, up time), memory (in use and swap), each disk (active time, read and write rates; model and size)
+  and each network interface but `lo` (receive and send). A `Device` holds its histories, graphs and a `Refresh`
+  that adds a sample and sets the texts; every refresh samples every device, shown or not. `SyncDevices` adds and
+  removes disks and interfaces as `SystemStats` reports them (sorted: CPU, memory, disks, interfaces).
+- **GraphWidget** (WTLHelper's GraphControl): a `SampleHistory` drawn with `QPainter`, newest at the right, each
+  series a filled line on a grid. The scale is fixed (`SetMaximum`: 100% is 1000000) or follows the history
+  (`NiceCeiling`; `SetByteScale` for sizes and rates: `NiceByteCeiling`, 1024-based units). `SetCompact` for the
+  navigation list.
+- `SampleHistory`: a ring buffer of samples of one or more series, oldest first; with `NiceCeiling` and
+  `NiceByteCeiling`, tested.
+- `Format`: values as the views show them (sizes, rates, percents, CPU, states, times, up time), tested.
 - **Settings:** `AppSettings` (static accessors over `QSettings`, in `~/.config/ScorpioSoftware/LinSysLive.conf`):
   the update interval, the Processes tab's tree mode and header state (column order, widths, hidden columns, sort),
-  the window's geometry and active tab. Views save theirs in `IView::SaveSettings`, called at close.
+  the Performance tab's page, the window's geometry and active tab. Views save theirs in `IView::SaveSettings`,
+  called at close.
 
 ## Conventions
 

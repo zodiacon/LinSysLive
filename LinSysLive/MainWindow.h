@@ -21,6 +21,8 @@ public:
 	const LinSys::SystemStats& GetSystemStats() const override { return m_Stats; }
 	void ShowStatusMessage(const QString& text) override;
 
+	// --tab: the tab to show (from 0)
+	void SelectTab(int index);
 	// --screenshot: save the window as an image after a number of refreshes, then exit (settings left as they were)
 	void TakeScreenshot(const QString& path, int afterRefreshes);
 

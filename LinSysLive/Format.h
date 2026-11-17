@@ -15,4 +15,10 @@ namespace Format {
 	QString StartTime(uint64_t nanosecondsAfterBoot);
 	// nanoseconds of CPU time as h:mm:ss.ms
 	QString CpuTime(uint64_t nanoseconds);
+	// bytes per second as Size does bytes: "1.5 M/s"
+	QString Rate(uint64_t bytesPerSecond);
+	// 1/10000 of a percent with one decimal and the sign: "12.5%" (0 too)
+	QString Percent(int32_t value);
+	// seconds as days, hours, minutes and seconds: "3:04:05:06", or "4:05:06" under a day
+	QString Uptime(uint64_t seconds);
 }

@@ -48,6 +48,22 @@ namespace Format {
 		return QLocale().toString(time, QLocale::ShortFormat);
 	}
 
+	QString Rate(uint64_t bytesPerSecond) {
+		return Size(bytesPerSecond) + "/s";
+	}
+
+	QString Percent(int32_t value) {
+		return QString::number(value / 10000.0, 'f', 1) + "%";
+	}
+
+	QString Uptime(uint64_t seconds) {
+		auto time = QStringLiteral("%1:%2:%3")
+			.arg(seconds / 3600 % 24, seconds >= 86400 ? 2 : 1, 10, QChar('0'))
+			.arg(seconds / 60 % 60, 2, 10, QChar('0'))
+			.arg(seconds % 60, 2, 10, QChar('0'));
+		return seconds >= 86400 ? QString::number(seconds / 86400) + ":" + time : time;
+	}
+
 	QString CpuTime(uint64_t nanoseconds) {
 		auto ms = nanoseconds / 1000000;
 		return QStringLiteral("%1:%2:%3.%4")

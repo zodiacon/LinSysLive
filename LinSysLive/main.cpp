@@ -16,9 +16,13 @@ int main(int argc, char* argv[]) {
 	parser.addVersionOption();
 	QCommandLineOption screenshot("screenshot", "Save the window as an image after a few refreshes, then exit.", "file");
 	parser.addOption(screenshot);
+	QCommandLineOption tab("tab", "The tab to show, from 0 (Processes, Performance).", "index");
+	parser.addOption(tab);
 	parser.process(app);
 
 	MainWindow window;
+	if (parser.isSet(tab))
+		window.SelectTab(parser.value(tab).toInt());
 	if (parser.isSet(screenshot))
 		window.TakeScreenshot(parser.value(screenshot), 3);
 	window.show();

@@ -22,6 +22,7 @@ add_subdirectory(linsys)
 add_library(LinSysLiveCore STATIC
 	LinSysLive/Format.cpp
 	LinSysLive/ProcessesModel.cpp
+	LinSysLive/SampleHistory.cpp
 )
 target_include_directories(LinSysLiveCore PUBLIC LinSysLive)
 target_link_libraries(LinSysLiveCore PUBLIC LinSys Qt6::Core Qt6::Gui)
@@ -29,7 +30,9 @@ target_compile_options(LinSysLiveCore PRIVATE -Wall -Wextra)
 
 qt_add_executable(linsyslive
 	LinSysLive/main.cpp
+	LinSysLive/GraphWidget.cpp
 	LinSysLive/MainWindow.cpp
+	LinSysLive/PerformanceView.cpp
 	LinSysLive/ProcessesView.cpp
 )
 target_link_libraries(linsyslive PRIVATE LinSysLiveCore Qt6::Widgets)
@@ -40,6 +43,7 @@ add_executable(Tests
 	linsys/Tests/Main.cpp
 	Tests/FormatTests.cpp
 	Tests/ProcessesModelTests.cpp
+	Tests/SampleHistoryTests.cpp
 )
 target_include_directories(Tests PRIVATE linsys/Tests)
 target_link_libraries(Tests PRIVATE LinSysLiveCore Qt6::Test)

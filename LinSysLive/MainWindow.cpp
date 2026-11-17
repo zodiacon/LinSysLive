@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "AppSettings.h"
 #include "Format.h"
+#include "PerformanceView.h"
 #include "ProcessesView.h"
 
 #include <LinSys/ProcFs.h>
@@ -24,6 +25,7 @@ MainWindow::MainWindow() {
 	m_Tabs->setDocumentMode(true);
 	setCentralWidget(m_Tabs);
 	AddView(new ProcessesView(*this, m_Tabs));
+	AddView(new PerformanceView(*this, m_Tabs));
 	m_Tabs->setCurrentIndex(std::clamp(AppSettings::ActiveTab(), 0, m_Tabs->count() - 1));
 
 	CreateMenus();
@@ -126,6 +128,11 @@ void MainWindow::UpdateStatusBar() {
 
 void MainWindow::ShowStatusMessage(const QString& text) {
 	statusBar()->showMessage(text, 5000);
+}
+
+void MainWindow::SelectTab(int index) {
+	if (index >= 0 && index < m_Tabs->count())
+		m_Tabs->setCurrentIndex(index);
 }
 
 void MainWindow::TakeScreenshot(const QString& path, int afterRefreshes) {
