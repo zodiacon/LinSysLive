@@ -37,6 +37,7 @@ private:
 	void CreateMenus();
 	void CreateStatusBar();
 	void AddView(IView* view);
+	static void ApplyTheme(bool dark);
 	void Refresh();
 	void SetPaused(bool paused);
 	void UpdateStatusBar();

@@ -37,7 +37,7 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
 `QT_QPA_PLATFORM=offscreen`. The Release build's `linsyslive` is uploaded (the `linsyslive` artifact).
 
 - `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`, `KeyedTableModel`,
-  `DetailsRows`, `ServicesRows`, `NetworkRows`), linked by the
+  `DetailsRows`, `ServicesRows`, `NetworkRows`, `Theme`), linked by the
   app and the tests.
 - `linsyslive`: the window and the views.
 - `Tests`: LinSys's runner (`linsys/Tests/TestFramework.h` and `Main.cpp`: `TEST`, `CHECK`, `CHECK_EQ`) and its fake
@@ -105,6 +105,12 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
 - `SampleHistory`: a ring buffer of samples of one or more series, oldest first; with `NiceCeiling` and
   `NiceByteCeiling`, tested.
 - `Format`: values as the views show them (sizes, rates, percents, CPU, states, times, up time), tested.
+- **Dark mode** (Options > Dark Mode, as WinSysLive's; the `Window/DarkMode` setting): `MainWindow::ApplyTheme` sets
+  Fusion and `Theme::DarkPalette` (Qt 6.4, CI's, has no color-scheme API), and back to the style and palette the app
+  started with; it's applied before the views are made. Colors the code picks for a light background go through
+  `Theme::Readable` where they're drawn (`KeyedTableModel`'s foreground, `GraphWidget`'s lines): lighter in dark
+  mode, grays mirrored so they stay dimmer than the text. Use palette roles for everything else. Translucent row
+  backgrounds (new and closed, green and red) work on both. To screenshot it, write `[Window]` `DarkMode=true`.
 - **Settings:** `AppSettings` (static accessors over `QSettings`, in `~/.config/ScorpioSoftware/LinSysLive.conf`):
   the update interval, the Processes tab's tree mode and header state (column order, widths, hidden columns, sort),
   the Performance tab's page, the window's geometry and active tab. Views save theirs in `IView::SaveSettings`,

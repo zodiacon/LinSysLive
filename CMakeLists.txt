@@ -27,6 +27,7 @@ add_library(LinSysLiveCore STATIC
 	LinSysLive/ProcessesModel.cpp
 	LinSysLive/SampleHistory.cpp
 	LinSysLive/ServicesRows.cpp
+	LinSysLive/Theme.cpp
 )
 target_include_directories(LinSysLiveCore PUBLIC LinSysLive)
 target_link_libraries(LinSysLiveCore PUBLIC LinSys Qt6::Core Qt6::Gui)
@@ -54,6 +55,7 @@ add_executable(Tests
 	Tests/ProcessesModelTests.cpp
 	Tests/SampleHistoryTests.cpp
 	Tests/ServicesTests.cpp
+	Tests/ThemeTests.cpp
 )
 target_include_directories(Tests PRIVATE linsys/Tests)
 target_link_libraries(Tests PRIVATE LinSysLiveCore Qt6::Test)

@@ -45,6 +45,9 @@ public:
 	static QString PerformancePage() { return Value("Performance/Page", "cpu").toString(); }
 	static void SetPerformancePage(const QString& key) { SetValue("Performance/Page", key); }
 
+	static bool DarkMode() { return Value("Window/DarkMode", false).toBool(); }
+	static void SetDarkMode(bool dark) { SetValue("Window/DarkMode", dark); }
+
 	static QByteArray WindowGeometry() { return Value("Window/Geometry").toByteArray(); }
 	static void SetWindowGeometry(const QByteArray& state) { SetValue("Window/Geometry", state); }
 	static int ActiveTab() { return Value("Window/ActiveTab", 0).toInt(); }

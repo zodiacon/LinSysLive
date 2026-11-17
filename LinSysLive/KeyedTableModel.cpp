@@ -1,4 +1,5 @@
 #include "KeyedTableModel.h"
+#include "Theme.h"
 
 #include <QHash>
 
@@ -94,7 +95,7 @@ QVariant KeyedTableModel::data(const QModelIndex& index, int role) const {
 		case Qt::BackgroundRole:
 			return row->Background.isValid() ? QVariant(row->Background) : QVariant();
 		case Qt::ForegroundRole:
-			return row->Foreground.isValid() ? QVariant(row->Foreground) : QVariant();
+			return row->Foreground.isValid() ? QVariant(Theme::Readable(row->Foreground)) : QVariant();
 		case Qt::ToolTipRole:
 			return row->ToolTip.isEmpty() ? QVariant() : QVariant(row->ToolTip);
 		case Qt::TextAlignmentRole:

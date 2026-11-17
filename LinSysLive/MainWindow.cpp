@@ -5,6 +5,7 @@
 #include "ProcessesView.h"
 #include "ServicesView.h"
 #include "NetworkView.h"
+#include "Theme.h"
 
 #include <LinSys/ProcFs.h>
 #include <QActionGroup>
@@ -15,6 +16,8 @@
 #include <QMessageBox>
 #include <QScreen>
 #include <QStatusBar>
+#include <QStyle>
+#include <QStyleFactory>
 #include <QTabWidget>
 
 MainWindow::MainWindow() {
@@ -22,6 +25,8 @@ MainWindow::MainWindow() {
 	// the first snapshot, before the views are made from it
 	m_ProcessManager.Update();
 	m_Stats.Update();
+
+	ApplyTheme(AppSettings::DarkMode());
 
 	m_Tabs = new QTabWidget(this);
 	m_Tabs->setDocumentMode(true);
@@ -42,6 +47,25 @@ MainWindow::MainWindow() {
 
 	connect(&m_Timer, &QTimer::timeout, this, &MainWindow::Refresh);
 	m_Timer.start(AppSettings::UpdateInterval());
+}
+
+// dark: Fusion with the dark palette (the platform's style may draw with its own colors and ignore the palette);
+// light: the style and palette the app started with. Widgets repaint on the palette's change; the colors the code
+// picks (Theme::Readable) are asked for again as they paint
+void MainWindow::ApplyTheme(bool dark) {
+	static const QString originalStyle = QApplication::style()->name();
+	static const QPalette originalPalette = QApplication::palette();
+	if (dark == Theme::IsDark())
+		return;
+	Theme::SetDark(dark);
+	if (dark) {
+		QApplication::setStyle(QStyleFactory::create("Fusion"));
+		QApplication::setPalette(Theme::DarkPalette());
+	}
+	else {
+		QApplication::setStyle(QStyleFactory::create(originalStyle));
+		QApplication::setPalette(originalPalette);
+	}
 }
 
 void MainWindow::AddView(IView* view) {
@@ -72,6 +96,15 @@ void MainWindow::CreateMenus() {
 			m_Timer.setInterval(ms);
 		});
 	}
+
+	auto options = menuBar()->addMenu(tr("&Options"));
+	auto dark = options->addAction(tr("&Dark Mode"));
+	dark->setCheckable(true);
+	dark->setChecked(Theme::IsDark());
+	connect(dark, &QAction::toggled, this, [](bool on) {
+		AppSettings::SetDarkMode(on);
+		ApplyTheme(on);
+	});
 
 	auto help = menuBar()->addMenu(tr("&Help"));
 	help->addAction(tr("&About LinSysLive..."), this, [this] {

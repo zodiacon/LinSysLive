@@ -1,5 +1,6 @@
 #include "GraphWidget.h"
 #include "SampleHistory.h"
+#include "Theme.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -46,7 +47,7 @@ QSize GraphWidget::minimumSizeHint() const {
 void GraphWidget::paintEvent(QPaintEvent*) {
 	QPainter painter(this);
 	auto area = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
-	auto frame = m_Colors[0];
+	auto frame = Theme::Readable(m_Colors[0]);
 	painter.fillRect(rect(), palette().base());
 
 	if (!m_Compact) {
@@ -72,7 +73,7 @@ void GraphWidget::paintEvent(QPaintEvent*) {
 		auto step = area.width() / double(std::max<size_t>(m_History->Capacity() - 1, 1));
 		// the last series first, so the first is on top
 		for (auto series = m_History->SeriesCount(); series-- > 0;) {
-			auto color = series < m_Colors.size() ? m_Colors[series] : m_Colors[0];
+			auto color = Theme::Readable(series < m_Colors.size() ? m_Colors[series] : m_Colors[0]);
 			QPainterPath line;
 			for (size_t i = 0; i < count; i++) {
 				auto value = std::clamp(m_History->Get(series, i) / maximum, 0.0, 1.0);
