@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <QColor>
 #include <QStringList>
 #include <set>
 #include <vector>
@@ -11,6 +12,7 @@ struct TableRow {
 	std::vector<QVariant> Display;
 	std::vector<QVariant> Sort;		// empty: sort by Display
 	QString ToolTip;				// for every column; empty: none
+	QColor Foreground{};			// the text's; invalid: the default
 };
 
 // A table replaced by a new set of rows on each refresh, but changed in place: rows whose keys are gone are removed,

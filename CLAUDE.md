@@ -8,7 +8,7 @@ this app's parts are named after them.
 
 ## Build
 
-CMake and Ninja, g++ 15, Qt 6.10 from Ubuntu's packages (`qt6-base-dev`), in WSL on the development machine; WSLg
+CMake and Ninja, g++ 15, Qt 6.10 and libsystemd (sd-bus, for LinSys) from Ubuntu's packages (`qt6-base-dev`, `libsystemd-dev`), in WSL on the development machine; WSLg
 shows the window. From Windows:
 
 ```powershell
@@ -19,18 +19,18 @@ wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screens
 ```
 
 `--screenshot file` saves the window as an image after three refreshes and exits without saving settings: the way
-to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance); `--process pid` (or
+to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance, 2 Services); `--process pid` (or
 `self`) selects a process, so the lower pane shows it. To show a Performance page or a lower-pane page, write
 `[Performance]` `Page=disk:sdd` or `[Processes]` `DetailsPage=2` to `~/.config/ScorpioSoftware/LinSysLive.conf` first
 (and remove the file after: it's the app's settings). Load to
 see: CPU from `sh -c 'while :; do :; done'`, disk from `dd ... oflag=direct` to a file under `~` (`/tmp` is tmpfs in WSL).
 
-CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14 and its Qt (6.4, so don't use newer
+CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14, libsystemd-dev and its Qt (6.4, so don't use newer
 Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
 `QT_QPA_PLATFORM=offscreen`.
 
 - `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`, `KeyedTableModel`,
-  `DetailsRows`), linked by the
+  `DetailsRows`, `ServicesRows`), linked by the
   app and the tests.
 - `linsyslive`: the window and the views.
 - `Tests`: LinSys's runner (`linsys/Tests/TestFramework.h` and `Main.cpp`: `TEST`, `CHECK`, `CHECK_EQ`) and its fake
@@ -68,6 +68,14 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
 - `KeyedTableModel`: a table given a new set of rows each refresh, changed in place by key (removed in runs, kept
   where they are, new ones appended), so selection and scroll survive; tested under `QAbstractItemModelTester`.
   `DetailsRows`: the lower pane's columns and rows from LinSys's data, tested.
+- **ServicesView** (WinSysLive's Services tab): systemd's services from `LinSys::ServiceManager` (its own D-Bus
+  connection), in a `KeyedTableModel` (`ServicesRows`: name without ".service", description, state as a word, startup
+  type, main PID, load state; failed ones red, stopped grey), filtered by the box above. Start, Stop, Restart (Stop and
+  Restart ask first; without root, polkit decides, and a refusal says to run as root or with an agent) and Go to
+  Process (`IMainWindow::GoToProcess`; double-click too). Unlike the process views it reads only while its tab is
+  shown (no history to keep, and a D-Bus call per running service); the unit files (200 ms) are read again when the
+  tab is shown again and after an action, not every refresh. The calls block: a polkit agent's password prompt holds
+  the window until it's answered.
 - **PerformanceView** (WinSysLive's Performance view): a navigation list (`NavItem`: a compact graph, a title and a
   value) and a page per device in a `QStackedWidget`: CPU (overall with kernel time, a small graph per processor,
   processes, threads, up time; the model in the title), memory (in use and swap), each disk ("Disk sdd (/)": its

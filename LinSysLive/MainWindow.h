@@ -21,6 +21,7 @@ public:
 	const LinSys::SystemStats& GetSystemStats() const override { return m_Stats; }
 	void ShowStatusMessage(const QString& text) override;
 	void SetThreadsProcess(uint32_t pid) override;
+	bool GoToProcess(uint32_t pid) override;
 
 	// --tab: the tab to show (from 0)
 	void SelectTab(int index);

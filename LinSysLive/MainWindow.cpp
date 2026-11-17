@@ -3,6 +3,7 @@
 #include "Format.h"
 #include "PerformanceView.h"
 #include "ProcessesView.h"
+#include "ServicesView.h"
 
 #include <LinSys/ProcFs.h>
 #include <QActionGroup>
@@ -27,6 +28,7 @@ MainWindow::MainWindow() {
 	m_ProcessesView = new ProcessesView(*this, m_Tabs);
 	AddView(m_ProcessesView);
 	AddView(new PerformanceView(*this, m_Tabs));
+	AddView(new ServicesView(*this, m_Tabs));
 	m_Tabs->setCurrentIndex(std::clamp(AppSettings::ActiveTab(), 0, m_Tabs->count() - 1));
 
 	CreateMenus();
@@ -174,4 +176,14 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
 void MainWindow::SelectProcess(uint32_t pid) {
 	m_ProcessesView->SelectProcess(pid);
+}
+
+bool MainWindow::GoToProcess(uint32_t pid) {
+	m_Tabs->setCurrentWidget(m_ProcessesView);
+	if (m_ProcessesView->SelectProcess(pid)) {
+		m_ProcessesView->setFocus();
+		return true;
+	}
+	ShowStatusMessage(tr("Process %1 isn't running").arg(pid));
+	return false;
 }

@@ -15,6 +15,8 @@ struct IMainWindow {
 	// the process whose threads the snapshot takes (the Processes tab's Threads page), 0 for none (the update is
 	// cheaper); a new one refreshes at once, so the page doesn't wait for the next tick
 	virtual void SetThreadsProcess(uint32_t pid) = 0;
+	// shows the Processes tab with the process selected (WinSysLive's Go to Process); false if it isn't there
+	virtual bool GoToProcess(uint32_t pid) = 0;
 
 protected:
 	~IMainWindow() = default;

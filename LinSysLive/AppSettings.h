@@ -31,6 +31,10 @@ public:
 		QSettings().setValue(QStringLiteral("Processes/DetailsHeader%1").arg(page), state);
 	}
 
+	// the Services tab's columns
+	static QByteArray ServicesHeader() { return Value("Services/Header").toByteArray(); }
+	static void SetServicesHeader(const QByteArray& state) { SetValue("Services/Header", state); }
+
 	// the Performance tab's selected page: "cpu", "memory", "disk:sda", "net:eth0"
 	static QString PerformancePage() { return Value("Performance/Page", "cpu").toString(); }
 	static void SetPerformancePage(const QString& key) { SetValue("Performance/Page", key); }

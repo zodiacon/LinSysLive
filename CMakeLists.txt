@@ -25,6 +25,7 @@ add_library(LinSysLiveCore STATIC
 	LinSysLive/KeyedTableModel.cpp
 	LinSysLive/ProcessesModel.cpp
 	LinSysLive/SampleHistory.cpp
+	LinSysLive/ServicesRows.cpp
 )
 target_include_directories(LinSysLiveCore PUBLIC LinSysLive)
 target_link_libraries(LinSysLiveCore PUBLIC LinSys Qt6::Core Qt6::Gui)
@@ -37,6 +38,7 @@ qt_add_executable(linsyslive
 	LinSysLive/PerformanceView.cpp
 	LinSysLive/ProcessDetailsPane.cpp
 	LinSysLive/ProcessesView.cpp
+	LinSysLive/ServicesView.cpp
 )
 target_link_libraries(linsyslive PRIVATE LinSysLiveCore Qt6::Widgets)
 target_compile_options(linsyslive PRIVATE -Wall -Wextra)
@@ -48,6 +50,7 @@ add_executable(Tests
 	Tests/DetailsTests.cpp
 	Tests/ProcessesModelTests.cpp
 	Tests/SampleHistoryTests.cpp
+	Tests/ServicesTests.cpp
 )
 target_include_directories(Tests PRIVATE linsys/Tests)
 target_link_libraries(Tests PRIVATE LinSysLiveCore Qt6::Test)
