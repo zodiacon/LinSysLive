@@ -1,0 +1,3 @@
+[submodule "linsys"]
+	path = linsys
+	url = https://github.com/zodiacon/LinSys.git

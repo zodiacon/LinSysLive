@@ -1,0 +1,26 @@
+#include "MainWindow.h"
+
+#include <QApplication>
+#include <QCommandLineParser>
+
+int main(int argc, char* argv[]) {
+	QApplication app(argc, argv);
+	// QSettings' file: ~/.config/ScorpioSoftware/LinSysLive.conf (WinSysLive's key is Software\ScorpioSoftware\WinSysLive)
+	QApplication::setOrganizationName("ScorpioSoftware");
+	QApplication::setApplicationName("LinSysLive");
+	QApplication::setApplicationVersion("0.1");
+
+	QCommandLineParser parser;
+	parser.setApplicationDescription("Processes and system information for Linux");
+	parser.addHelpOption();
+	parser.addVersionOption();
+	QCommandLineOption screenshot("screenshot", "Save the window as an image after a few refreshes, then exit.", "file");
+	parser.addOption(screenshot);
+	parser.process(app);
+
+	MainWindow window;
+	if (parser.isSet(screenshot))
+		window.TakeScreenshot(parser.value(screenshot), 3);
+	window.show();
+	return app.exec();
+}
