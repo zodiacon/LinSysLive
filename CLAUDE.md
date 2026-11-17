@@ -12,7 +12,8 @@ CMake and Ninja, g++ 15, Qt 6.10 and libsystemd (sd-bus, for LinSys) from Ubuntu
 shows the window. From Windows:
 
 ```powershell
-wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build -G Ninja && cmake --build build"
+wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build -G Ninja && cmake --build build"   # Debug (the default)
+wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-release"
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/Tests"        # Tests Live / Tests -Live, as WinSysLive's
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive"
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screenshot /tmp/shot.png"
@@ -33,7 +34,7 @@ Root's settings are its own (`/root/.config`). To test without a password: `wsl 
 
 CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14, libsystemd-dev and its Qt (6.4, so don't use newer
 Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
-`QT_QPA_PLATFORM=offscreen`.
+`QT_QPA_PLATFORM=offscreen`. The Release build's `linsyslive` is uploaded (the `linsyslive` artifact).
 
 - `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`, `KeyedTableModel`,
   `DetailsRows`, `ServicesRows`, `NetworkRows`), linked by the

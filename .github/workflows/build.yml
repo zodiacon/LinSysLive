@@ -40,3 +40,11 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: ./build/Tests Live
+
+      - name: Upload the Release build
+        if: matrix.config == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linsyslive
+          path: build/linsyslive
+          if-no-files-found: error
