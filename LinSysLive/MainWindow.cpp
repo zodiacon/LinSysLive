@@ -24,7 +24,8 @@ MainWindow::MainWindow() {
 	m_Tabs = new QTabWidget(this);
 	m_Tabs->setDocumentMode(true);
 	setCentralWidget(m_Tabs);
-	AddView(new ProcessesView(*this, m_Tabs));
+	m_ProcessesView = new ProcessesView(*this, m_Tabs);
+	AddView(m_ProcessesView);
 	AddView(new PerformanceView(*this, m_Tabs));
 	m_Tabs->setCurrentIndex(std::clamp(AppSettings::ActiveTab(), 0, m_Tabs->count() - 1));
 
@@ -94,7 +95,11 @@ void MainWindow::CreateStatusBar() {
 }
 
 void MainWindow::Refresh() {
-	m_ProcessManager.Update();
+	m_RefreshQueued = false;
+	if (m_ThreadsPid)
+		m_ProcessManager.UpdateWithThreads(m_ThreadsPid);
+	else
+		m_ProcessManager.Update();
 	m_Stats.Update();
 	auto active = m_Tabs->currentWidget();
 	for (auto view : m_Views)
@@ -130,6 +135,18 @@ void MainWindow::ShowStatusMessage(const QString& text) {
 	statusBar()->showMessage(text, 5000);
 }
 
+void MainWindow::SetThreadsProcess(uint32_t pid) {
+	if (pid == m_ThreadsPid)
+		return;
+	m_ThreadsPid = pid;
+	// refresh once the event at hand is done (a view may be asking from inside OnRefresh), and once for any number
+	// of changes before then (the selection moving down a list)
+	if (pid && !m_RefreshQueued) {
+		m_RefreshQueued = true;
+		QMetaObject::invokeMethod(this, &MainWindow::Refresh, Qt::QueuedConnection);
+	}
+}
+
 void MainWindow::SelectTab(int index) {
 	if (index >= 0 && index < m_Tabs->count())
 		m_Tabs->setCurrentIndex(index);
@@ -153,4 +170,8 @@ void MainWindow::SaveSettings() {
 void MainWindow::closeEvent(QCloseEvent* event) {
 	SaveSettings();
 	event->accept();
+}
+
+void MainWindow::SelectProcess(uint32_t pid) {
+	m_ProcessesView->SelectProcess(pid);
 }

@@ -3,6 +3,8 @@
 #include "Format.h"
 #include "GraphWidget.h"
 
+#include <LinSys/ProcessDetails.h>
+
 #include <QFrame>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -84,6 +86,7 @@ public:
 
 	GraphWidget* Graph() const { return m_Graph; }
 	void SetDetail(const QString& text) { m_Detail->setText(text); }
+	void SetTitle(const QString& text) { m_Title->setText(text); }
 	void SetSelected(bool selected) {
 		setAutoFillBackground(selected);
 		setBackgroundRole(selected ? QPalette::Highlight : QPalette::Window);
@@ -204,6 +207,7 @@ QVBoxLayout* PerformanceView::MakePage(Device& device, const QString& title, con
 	header->addWidget(subtitleLabel, 0, Qt::AlignBottom);
 	layout->addLayout(header);
 	device.Page = page;
+	device.Title = titleLabel;
 	m_Pages->addWidget(page);
 	return layout;
 }
@@ -251,7 +255,9 @@ void PerformanceView::AddCpu() {
 	device->Nav->Graph()->SetColors({ CpuColor, KernelColor });
 	device->Nav->Graph()->SetMaximum(FullCpu);
 
-	auto layout = MakePage(*device, tr("CPU"), tr("%n processor(s)", "", processors));
+	auto model = QString::fromStdString(LinSys::SystemInfo::GetCpuModel());
+	auto processorsText = tr("%n processor(s)", "", processors);
+	auto layout = MakePage(*device, tr("CPU"), model.isEmpty() ? processorsText : model + ", " + processorsText);
 	AddGraph(*device, layout, total, { CpuColor, KernelColor }, FullCpu, PercentScale,
 		tr("Utilization over %1 samples (kernel time darker)").arg(HistorySize), 3);
 
@@ -380,13 +386,23 @@ void PerformanceView::AddDisk(const QString& name) {
 	auto capacity = AddValue(values, 3, tr("Capacity"));
 	auto totalRead = AddValue(values, 4, tr("Read since boot"));
 	auto totalWritten = AddValue(values, 5, tr("Written since boot"));
+	auto mounted = AddValue(values, 6, tr("Mounted on"));
 	layout->addLayout(values);
 	capacity->setText(size);
 
-	device->Refresh = [this, device, stdName, active, read, write, totalRead, totalWritten] {
+	device->Refresh = [this, device, name, stdName, active, read, write, totalRead, totalWritten, mounted] {
 		auto rate = FindDisk(m_Frame.GetSystemStats(), stdName);
 		if (!rate)
 			return;
+		// "Disk sdd (/)": its first (shortest) mount point; they change as file systems are mounted
+		QStringList points;
+		for (auto& point : rate->Disk.MountPoints)
+			points << QString::fromStdString(point);
+		auto title = points.isEmpty() ? tr("Disk %1").arg(name) : tr("Disk %1 (%2)").arg(name, points[0]);
+		device->Nav->SetTitle(title);
+		device->Title->setText(title);
+		mounted->setText(points.isEmpty() ? tr("Not mounted") : points.join(", "));
+		mounted->setToolTip(points.join('\n'));
 		device->Histories[0]->Add({ double(rate->ReadRate), double(rate->WriteRate) });
 		device->Histories[1]->Add({ double(rate->Active) });
 		active->setText(Format::Percent(rate->Active));

@@ -19,15 +19,18 @@ wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screens
 ```
 
 `--screenshot file` saves the window as an image after three refreshes and exits without saving settings: the way
-to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance). To show a
-Performance page, write `[Performance]` `Page=disk:sdd` to `~/.config/ScorpioSoftware/LinSysLive.conf` first. Load to
+to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance); `--process pid` (or
+`self`) selects a process, so the lower pane shows it. To show a Performance page or a lower-pane page, write
+`[Performance]` `Page=disk:sdd` or `[Processes]` `DetailsPage=2` to `~/.config/ScorpioSoftware/LinSysLive.conf` first
+(and remove the file after: it's the app's settings). Load to
 see: CPU from `sh -c 'while :; do :; done'`, disk from `dd ... oflag=direct` to a file under `~` (`/tmp` is tmpfs in WSL).
 
 CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14 and its Qt (6.4, so don't use newer
 Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
 `QT_QPA_PLATFORM=offscreen`.
 
-- `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`), linked by the
+- `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`, `KeyedTableModel`,
+  `DetailsRows`), linked by the
   app and the tests.
 - `linsyslive`: the window and the views.
 - `Tests`: LinSys's runner (`linsys/Tests/TestFramework.h` and `Main.cpp`: `TEST`, `CHECK`, `CHECK_EQ`) and its fake
@@ -53,9 +56,22 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
   `ProcessInfoEx`. Sorting and filtering are a `QSortFilterProxyModel`'s (`SortRole` gives raw values; recursive
   filtering keeps a match's ancestors). The tests put `QAbstractItemModelTester` on the model and on a sorting proxy;
   keep them passing after any change to how rows change, and add a scenario for a new kind of change.
+- **ProcessDetailsPane**, the Processes tab's lower pane (WinSysLive's Handles, Modules and Threads; the Details
+  button, in a splitter under the tree): the current row's process's threads, open files, memory maps and
+  environment, each a `QTableView` over a `KeyedTableModel` (sorting proxy) with a status line above it (the count,
+  or why there's nothing: another user's process without root, a kernel thread, exited; an exited process keeps its
+  last lists). Only the page shown is read, on selection and on each refresh while the tab and the pane are shown
+  (`SetActive`). Threads come from the frame's snapshot: the pane calls `IMainWindow::SetThreadsProcess(pid)` (0
+  when the Threads page isn't shown), the frame then calls `UpdateWithThreads(pid)` and refreshes once at once
+  (queued, so a view asking from inside `OnRefresh` doesn't re-enter it). The rest come from
+  `LinSys::ProcessDetails`. Columns fit their first rows once, unless a saved layout was restored.
+- `KeyedTableModel`: a table given a new set of rows each refresh, changed in place by key (removed in runs, kept
+  where they are, new ones appended), so selection and scroll survive; tested under `QAbstractItemModelTester`.
+  `DetailsRows`: the lower pane's columns and rows from LinSys's data, tested.
 - **PerformanceView** (WinSysLive's Performance view): a navigation list (`NavItem`: a compact graph, a title and a
   value) and a page per device in a `QStackedWidget`: CPU (overall with kernel time, a small graph per processor,
-  processes, threads, up time), memory (in use and swap), each disk (active time, read and write rates; model and size)
+  processes, threads, up time; the model in the title), memory (in use and swap), each disk ("Disk sdd (/)": its
+  shortest mount point; active time, read and write rates; model, size, mount points)
   and each network interface but `lo` (receive and send). A `Device` holds its histories, graphs and a `Refresh`
   that adds a sample and sets the texts; every refresh samples every device, shown or not. `SyncDevices` adds and
   removes disks and interfaces as `SystemStats` reports them (sorted: CPU, memory, disks, interfaces).

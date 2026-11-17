@@ -17,6 +17,20 @@ public:
 	static QByteArray ProcessesHeader() { return Value("Processes/Header").toByteArray(); }
 	static void SetProcessesHeader(const QByteArray& state) { SetValue("Processes/Header", state); }
 
+	// the lower pane: shown, its height (the splitter's state), the page shown, each page's columns
+	static bool ProcessDetails() { return Value("Processes/Details", true).toBool(); }
+	static void SetProcessDetails(bool shown) { SetValue("Processes/Details", shown); }
+	static QByteArray ProcessesSplitter() { return Value("Processes/Splitter").toByteArray(); }
+	static void SetProcessesSplitter(const QByteArray& state) { SetValue("Processes/Splitter", state); }
+	static int ProcessDetailsPage() { return Value("Processes/DetailsPage", 0).toInt(); }
+	static void SetProcessDetailsPage(int index) { SetValue("Processes/DetailsPage", index); }
+	static QByteArray ProcessDetailsHeader(int page) {
+		return QSettings().value(QStringLiteral("Processes/DetailsHeader%1").arg(page)).toByteArray();
+	}
+	static void SetProcessDetailsHeader(int page, const QByteArray& state) {
+		QSettings().setValue(QStringLiteral("Processes/DetailsHeader%1").arg(page), state);
+	}
+
 	// the Performance tab's selected page: "cpu", "memory", "disk:sda", "net:eth0"
 	static QString PerformancePage() { return Value("Performance/Page", "cpu").toString(); }
 	static void SetPerformancePage(const QString& key) { SetValue("Performance/Page", key); }

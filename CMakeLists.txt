@@ -20,7 +20,9 @@ add_subdirectory(linsys)
 
 # the app's code that isn't the window, linked by the app and the tests
 add_library(LinSysLiveCore STATIC
+	LinSysLive/DetailsRows.cpp
 	LinSysLive/Format.cpp
+	LinSysLive/KeyedTableModel.cpp
 	LinSysLive/ProcessesModel.cpp
 	LinSysLive/SampleHistory.cpp
 )
@@ -33,6 +35,7 @@ qt_add_executable(linsyslive
 	LinSysLive/GraphWidget.cpp
 	LinSysLive/MainWindow.cpp
 	LinSysLive/PerformanceView.cpp
+	LinSysLive/ProcessDetailsPane.cpp
 	LinSysLive/ProcessesView.cpp
 )
 target_link_libraries(linsyslive PRIVATE LinSysLiveCore Qt6::Widgets)
@@ -42,6 +45,7 @@ target_compile_options(linsyslive PRIVATE -Wall -Wextra)
 add_executable(Tests
 	linsys/Tests/Main.cpp
 	Tests/FormatTests.cpp
+	Tests/DetailsTests.cpp
 	Tests/ProcessesModelTests.cpp
 	Tests/SampleHistoryTests.cpp
 )

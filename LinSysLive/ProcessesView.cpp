@@ -1,5 +1,6 @@
 #include "ProcessesView.h"
 #include "AppSettings.h"
+#include "ProcessDetailsPane.h"
 #include "ProcessesModel.h"
 
 #include <LinSys/Process.h>
@@ -10,6 +11,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <QSplitter>
 #include <QToolBar>
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -100,36 +102,67 @@ ProcessesView::ProcessesView(IMainWindow& frame, QWidget* parent) : QWidget(pare
 	m_TreeAction->setToolTip(tr("Show the processes under their parents"));
 	connect(m_TreeAction, &QAction::toggled, this, &ProcessesView::SetTree);
 
+	m_DetailsAction = new QAction(QIcon::fromTheme("view-split-top-bottom"), tr("Details"), this);
+	m_DetailsAction->setCheckable(true);
+	m_DetailsAction->setChecked(AppSettings::ProcessDetails());
+	m_DetailsAction->setToolTip(tr("Show the selected process's threads, open files, memory maps and environment below"));
+
 	auto bar = new QToolBar(this);
 	bar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	bar->addWidget(m_Filter);
 	bar->addSeparator();
 	bar->addAction(m_TreeAction);
+	bar->addAction(m_DetailsAction);
 	bar->addSeparator();
 	bar->addAction(m_Terminate);
 	bar->addAction(m_Kill);
 	bar->addAction(m_Suspend);
 	bar->addAction(m_Resume);
 
+	m_Details = new ProcessDetailsPane(m_Frame, this);
+	m_Splitter = new QSplitter(Qt::Vertical, this);
+	m_Splitter->addWidget(m_Tree);
+	m_Splitter->addWidget(m_Details);
+	m_Splitter->setStretchFactor(0, 3);
+	m_Splitter->setStretchFactor(1, 2);
+	m_Splitter->setChildrenCollapsible(false);
+	if (!m_Splitter->restoreState(AppSettings::ProcessesSplitter()))
+		m_Splitter->setSizes({ 460, 260 });
+	m_Details->setVisible(m_DetailsAction->isChecked());
+	connect(m_DetailsAction, &QAction::toggled, this, [this](bool shown) {
+		m_Details->setVisible(shown);
+		m_Details->SetActive(shown && isVisible());
+		AppSettings::SetProcessDetails(shown);
+	});
+
 	auto layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(0);
 	layout->addWidget(bar);
-	layout->addWidget(m_Tree);
+	layout->addWidget(m_Splitter);
 
 	connect(m_Tree->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ProcessesView::UpdateActions);
+	// the pane follows the current row (the one with the focus), not the whole selection
+	connect(m_Tree->selectionModel(), &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current) {
+		m_Details->SetProcess(m_Model->GetProcessPointer(m_Proxy->mapToSource(current)));
+	});
 	UpdateActions();
 }
 
-void ProcessesView::OnRefresh(bool) {
+void ProcessesView::OnRefresh(bool active) {
 	// an inactive tab's tree isn't painted, so updating it costs only the model's work
 	m_Model->Update(m_Frame.GetProcessManager());
 	UpdateActions();
+	// the pane reads only while it's seen
+	m_Details->SetActive(active && m_DetailsAction->isChecked());
+	m_Details->Refresh();
 }
 
 void ProcessesView::SaveSettings() {
 	AppSettings::SetProcessesHeader(m_Tree->header()->saveState());
 	AppSettings::SetProcessesTree(m_Model->IsTree());
+	AppSettings::SetProcessesSplitter(m_Splitter->saveState());
+	m_Details->SaveSettings();
 }
 
 void ProcessesView::SetTree(bool tree) {
@@ -201,4 +234,16 @@ void ProcessesView::CopySelection() {
 		lines << fields.join('\t');
 	}
 	QApplication::clipboard()->setText(lines.join('\n'));
+}
+
+bool ProcessesView::SelectProcess(uint32_t pid) {
+	auto process = m_Frame.GetProcessManager().GetProcessById(pid);
+	if (!process)
+		return false;
+	auto index = m_Proxy->mapFromSource(m_Model->IndexOf(process->Key));
+	if (!index.isValid())
+		return false;
+	m_Tree->setCurrentIndex(index);
+	m_Tree->scrollTo(index);
+	return true;
 }

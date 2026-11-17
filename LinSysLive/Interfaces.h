@@ -12,6 +12,9 @@ struct IMainWindow {
 	[[nodiscard]] virtual const ProcessManager& GetProcessManager() const = 0;
 	[[nodiscard]] virtual const LinSys::SystemStats& GetSystemStats() const = 0;
 	virtual void ShowStatusMessage(const QString& text) = 0;
+	// the process whose threads the snapshot takes (the Processes tab's Threads page), 0 for none (the update is
+	// cheaper); a new one refreshes at once, so the page doesn't wait for the next tick
+	virtual void SetThreadsProcess(uint32_t pid) = 0;
 
 protected:
 	~IMainWindow() = default;

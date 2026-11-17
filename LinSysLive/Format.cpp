@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <QLocale>
+#include <QStringList>
 #include <time.h>
 
 namespace Format {
@@ -71,5 +72,43 @@ namespace Format {
 			.arg(ms / 60000 % 60, 2, 10, QChar('0'))
 			.arg(ms / 1000 % 60, 2, 10, QChar('0'))
 			.arg(ms % 1000, 3, 10, QChar('0'));
+	}
+}
+
+namespace Format {
+	QString Address(uint64_t address) {
+		return QStringLiteral("%1").arg(address, 12, 16, QChar('0'));
+	}
+
+	QString FileKind(LinSys::FileKind kind) {
+		switch (kind) {
+			case LinSys::FileKind::File: return QStringLiteral("File");
+			case LinSys::FileKind::Device: return QStringLiteral("Device");
+			case LinSys::FileKind::Socket: return QStringLiteral("Socket");
+			case LinSys::FileKind::Pipe: return QStringLiteral("Pipe");
+			case LinSys::FileKind::AnonymousInode: return QStringLiteral("Anonymous");
+			case LinSys::FileKind::Other: break;
+		}
+		return QStringLiteral("Other");
+	}
+
+	QString OpenFlags(uint32_t flags) {
+		// the kernel's octal values (asm-generic/fcntl.h), not the headers': O_LARGEFILE differs, and these are what
+		// fdinfo writes on every architecture that uses the generic ones (x86, ARM)
+		QStringList parts;
+		switch (flags & 03) {
+			case 00: parts << "Read"; break;
+			case 01: parts << "Write"; break;
+			case 02: parts << "Read/Write"; break;
+		}
+		struct Flag {
+			uint32_t Value;
+			const char* Name;
+		} names[] = { { 02000, "Append" }, { 04000, "Nonblocking" }, { 04010000, "Sync" }, { 040000, "Direct" },
+			{ 02000000, "Close on exec" } };
+		for (auto& flag : names)
+			if ((flags & flag.Value) == flag.Value)
+				parts << flag.Name;
+		return parts.join(", ");
 	}
 }

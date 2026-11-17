@@ -34,6 +34,7 @@ public:
 	void SetHighlightRefreshes(int count) { m_HighlightRefreshes = count; }
 
 	[[nodiscard]] ProcessInfoEx* GetProcess(const QModelIndex& index) const;
+	[[nodiscard]] std::shared_ptr<ProcessInfoEx> GetProcessPointer(const QModelIndex& index) const;
 	[[nodiscard]] QModelIndex IndexOf(const LinSys::ProcessOrThreadKey& key, int column = 0) const;
 
 	// QAbstractItemModel

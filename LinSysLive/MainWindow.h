@@ -20,9 +20,12 @@ public:
 	const ProcessManager& GetProcessManager() const override { return m_ProcessManager; }
 	const LinSys::SystemStats& GetSystemStats() const override { return m_Stats; }
 	void ShowStatusMessage(const QString& text) override;
+	void SetThreadsProcess(uint32_t pid) override;
 
 	// --tab: the tab to show (from 0)
 	void SelectTab(int index);
+	// --process: select a process in the Processes tab (its details show below it)
+	void SelectProcess(uint32_t pid);
 	// --screenshot: save the window as an image after a number of refreshes, then exit (settings left as they were)
 	void TakeScreenshot(const QString& path, int afterRefreshes);
 
@@ -43,6 +46,7 @@ private:
 	QTimer m_Timer;
 	QTabWidget* m_Tabs;
 	std::vector<IView*> m_Views;	// the tabs' widgets own them
+	class ProcessesView* m_ProcessesView;
 	QLabel* m_ProcessesLabel;
 	QLabel* m_CpuLabel;
 	QLabel* m_MemoryLabel;
@@ -50,5 +54,7 @@ private:
 	QAction* m_PauseAction;
 	QString m_ScreenshotPath;
 	int m_ScreenshotRefreshes{ 0 };
+	uint32_t m_ThreadsPid{ 0 };
+	bool m_RefreshQueued{ false };
 	bool m_SaveSettings{ true };
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <LinSys/ProcFs.h>
 #include <cstdint>
 
 // Values as the views show them; kept apart from the views so the tests can call them
@@ -21,4 +22,10 @@ namespace Format {
 	QString Percent(int32_t value);
 	// seconds as days, hours, minutes and seconds: "3:04:05:06", or "4:05:06" under a day
 	QString Uptime(uint64_t seconds);
+	// an address as maps shows it: 12 hex digits at least ("00400000" becomes "000000400000")
+	QString Address(uint64_t address);
+	// an open file's kind: "File", "Socket", "Pipe"...
+	QString FileKind(LinSys::FileKind kind);
+	// fdinfo's O_* flags (the kernel's values): the access, then Append, Nonblocking, Sync, Direct, Close on exec
+	QString OpenFlags(uint32_t flags);
 }

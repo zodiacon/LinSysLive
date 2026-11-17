@@ -182,6 +182,11 @@ ProcessInfoEx* ProcessesModel::GetProcess(const QModelIndex& index) const {
 	return node ? node->Process.get() : nullptr;
 }
 
+std::shared_ptr<ProcessInfoEx> ProcessesModel::GetProcessPointer(const QModelIndex& index) const {
+	auto node = NodeOf(index);
+	return node ? node->Process : nullptr;
+}
+
 QModelIndex ProcessesModel::IndexOf(const LinSys::ProcessOrThreadKey& key, int column) const {
 	auto it = m_Nodes.find(key);
 	return it == m_Nodes.end() ? QModelIndex() : IndexOf(it->second.get(), column);

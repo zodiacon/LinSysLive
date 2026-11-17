@@ -8,6 +8,8 @@ class QLineEdit;
 class QSortFilterProxyModel;
 class QTreeView;
 class ProcessesModel;
+class ProcessDetailsPane;
+class QSplitter;
 
 // The Processes tab: the processes as a tree or a list (sortable, filtered by the box above them), new ones in
 // green and terminated ones in red for a few refreshes, and signals to send them (Terminate, Kill, Suspend, Resume)
@@ -21,6 +23,9 @@ public:
 	QString GetTitle() const override { return tr("Processes"); }
 	void OnRefresh(bool active) override;
 	void SaveSettings() override;
+
+	// makes it the current row (scrolled to); false if it isn't in the list
+	bool SelectProcess(uint32_t pid);
 
 private:
 	enum class Signal { Terminate, Kill, Suspend, Resume };
@@ -36,6 +41,9 @@ private:
 	QTreeView* m_Tree;
 	QLineEdit* m_Filter;
 	QAction* m_TreeAction;
+	QAction* m_DetailsAction;
+	ProcessDetailsPane* m_Details;
+	QSplitter* m_Splitter;
 	QAction* m_Terminate;
 	QAction* m_Kill;
 	QAction* m_Suspend;

@@ -35,6 +35,7 @@ private:
 		QString Key;	// "cpu", "memory", "disk:sda", "net:eth0": the selection's setting
 		NavItem* Nav{ nullptr };
 		QWidget* Page{ nullptr };
+		QLabel* Title{ nullptr };	// the page's
 		std::vector<std::unique_ptr<SampleHistory>> Histories;
 		std::vector<GraphWidget*> Graphs;
 		std::function<void()> Refresh;	// adds a sample and sets the texts
