@@ -35,6 +35,12 @@ public:
 	static QByteArray ServicesHeader() { return Value("Services/Header").toByteArray(); }
 	static void SetServicesHeader(const QByteArray& state) { SetValue("Services/Header", state); }
 
+	// the Network tab's columns, and whether it shows listening sockets
+	static QByteArray NetworkHeader() { return Value("Network/Header").toByteArray(); }
+	static void SetNetworkHeader(const QByteArray& state) { SetValue("Network/Header", state); }
+	static bool NetworkListening() { return Value("Network/Listening", true).toBool(); }
+	static void SetNetworkListening(bool shown) { SetValue("Network/Listening", shown); }
+
 	// the Performance tab's selected page: "cpu", "memory", "disk:sda", "net:eth0"
 	static QString PerformancePage() { return Value("Performance/Page", "cpu").toString(); }
 	static void SetPerformancePage(const QString& key) { SetValue("Performance/Page", key); }

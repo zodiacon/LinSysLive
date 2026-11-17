@@ -19,7 +19,7 @@ wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screens
 ```
 
 `--screenshot file` saves the window as an image after three refreshes and exits without saving settings: the way
-to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance, 2 Services); `--process pid` (or
+to look at a change without a person at the screen. `--tab N` shows a tab (0 Processes, 1 Performance, 2 Services, 3 Network); `--process pid` (or
 `self`) selects a process, so the lower pane shows it. To show a Performance page or a lower-pane page, write
 `[Performance]` `Page=disk:sdd` or `[Processes]` `DetailsPage=2` to `~/.config/ScorpioSoftware/LinSysLive.conf` first
 (and remove the file after: it's the app's settings). Load to
@@ -30,7 +30,7 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
 `QT_QPA_PLATFORM=offscreen`.
 
 - `LinSysLiveCore`: the app's code that isn't widgets (`Format`, `ProcessesModel`, `SampleHistory`, `KeyedTableModel`,
-  `DetailsRows`, `ServicesRows`), linked by the
+  `DetailsRows`, `ServicesRows`, `NetworkRows`), linked by the
   app and the tests.
 - `linsyslive`: the window and the views.
 - `Tests`: LinSys's runner (`linsys/Tests/TestFramework.h` and `Main.cpp`: `TEST`, `CHECK`, `CHECK_EQ`) and its fake
@@ -76,6 +76,14 @@ Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the ga
   shown (no history to keep, and a D-Bus call per running service); the unit files (200 ms) are read again when the
   tab is shown again and after an action, not every refresh. The calls block: a polkit agent's password prompt holds
   the window until it's answered.
+- **NetworkView** (WinSysLive's Network tab): TCP and UDP sockets (IPv4 and IPv6) from `LinSys::Connections`, their
+  processes from a `LinSys::SocketOwners` the view keeps (it reads every process's fd links only when a socket appears
+  that it hasn't looked for), in a `KeyedTableModel`. `NetworkRows::Tracker` keeps them from one refresh to the next
+  by protocol and both ends (not the inode: a connection turning TIME_WAIT keeps its row): new ones green and closed
+  ones red (kept) for two refreshes, as processes are; the rows and their colours are `NetworkRows::Rows`, tested.
+  Listening sockets (TCP Listen, UDP without a peer) can be hidden (the Listening button, saved). Reads only while
+  shown, and starts over when shown again (nothing marked new then). Sockets of other users' processes have no
+  process without root; the status line counts them. Go to Process (double-click too).
 - **PerformanceView** (WinSysLive's Performance view): a navigation list (`NavItem`: a compact graph, a title and a
   value) and a page per device in a `QStackedWidget`: CPU (overall with kernel time, a small graph per processor,
   processes, threads, up time; the model in the title), memory (in use and swap), each disk ("Disk sdd (/)": its

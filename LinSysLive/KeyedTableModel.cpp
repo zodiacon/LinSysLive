@@ -91,6 +91,8 @@ QVariant KeyedTableModel::data(const QModelIndex& index, int role) const {
 			if (column < row->Sort.size() && row->Sort[column].isValid())
 				return row->Sort[column];
 			return column < row->Display.size() ? row->Display[column] : QVariant();
+		case Qt::BackgroundRole:
+			return row->Background.isValid() ? QVariant(row->Background) : QVariant();
 		case Qt::ForegroundRole:
 			return row->Foreground.isValid() ? QVariant(row->Foreground) : QVariant();
 		case Qt::ToolTipRole:

@@ -23,6 +23,7 @@ add_library(LinSysLiveCore STATIC
 	LinSysLive/DetailsRows.cpp
 	LinSysLive/Format.cpp
 	LinSysLive/KeyedTableModel.cpp
+	LinSysLive/NetworkRows.cpp
 	LinSysLive/ProcessesModel.cpp
 	LinSysLive/SampleHistory.cpp
 	LinSysLive/ServicesRows.cpp
@@ -35,6 +36,7 @@ qt_add_executable(linsyslive
 	LinSysLive/main.cpp
 	LinSysLive/GraphWidget.cpp
 	LinSysLive/MainWindow.cpp
+	LinSysLive/NetworkView.cpp
 	LinSysLive/PerformanceView.cpp
 	LinSysLive/ProcessDetailsPane.cpp
 	LinSysLive/ProcessesView.cpp
@@ -47,6 +49,7 @@ target_compile_options(linsyslive PRIVATE -Wall -Wextra)
 add_executable(Tests
 	linsys/Tests/Main.cpp
 	Tests/FormatTests.cpp
+	Tests/NetworkTests.cpp
 	Tests/DetailsTests.cpp
 	Tests/ProcessesModelTests.cpp
 	Tests/SampleHistoryTests.cpp

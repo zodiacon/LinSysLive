@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 	parser.addVersionOption();
 	QCommandLineOption screenshot("screenshot", "Save the window as an image after a few refreshes, then exit.", "file");
 	parser.addOption(screenshot);
-	QCommandLineOption tab("tab", "The tab to show, from 0 (Processes, Performance, Services).", "index");
+	QCommandLineOption tab("tab", "The tab to show, from 0 (Processes, Performance, Services, Network).", "index");
 	parser.addOption(tab);
 	QCommandLineOption process("process", "The process to select in the Processes tab: a pid, or self.", "pid");
 	parser.addOption(process);

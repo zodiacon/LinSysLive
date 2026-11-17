@@ -4,6 +4,7 @@
 #include "PerformanceView.h"
 #include "ProcessesView.h"
 #include "ServicesView.h"
+#include "NetworkView.h"
 
 #include <LinSys/ProcFs.h>
 #include <QActionGroup>
@@ -29,6 +30,7 @@ MainWindow::MainWindow() {
 	AddView(m_ProcessesView);
 	AddView(new PerformanceView(*this, m_Tabs));
 	AddView(new ServicesView(*this, m_Tabs));
+	AddView(new NetworkView(*this, m_Tabs));
 	m_Tabs->setCurrentIndex(std::clamp(AppSettings::ActiveTab(), 0, m_Tabs->count() - 1));
 
 	CreateMenus();
