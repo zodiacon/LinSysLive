@@ -8,7 +8,7 @@ this app's parts are named after them.
 
 ## Build
 
-CMake and Ninja, g++ 15, Qt 6.10 and libsystemd (sd-bus, for LinSys) from Ubuntu's packages (`qt6-base-dev`, `libsystemd-dev`), in WSL on the development machine; WSLg
+CMake and Ninja, g++ 15, Qt 6.10 and libsystemd (sd-bus, for LinSys) from Ubuntu's packages (`qt6-base-dev`, `libsystemd-dev`, `ninja-build`, `pkgconf`: LinSys finds libsystemd with pkg-config), in WSL on the development machine; WSLg
 shows the window. From Windows:
 
 ```powershell
@@ -31,6 +31,12 @@ XWayland, where WSLg's mouse pointer is invisible over the window. `main.cpp` (`
 `WAYLAND_DISPLAY` at `/run/user/$SUDO_UID/wayland-0` (or `PKEXEC_UID`'s) when it's there and no platform was chosen.
 Root's settings are its own (`/root/.config`). To test without a password: `wsl -u root` with
 `env -i DISPLAY=:0 HOME=/root SUDO_UID=1000 ...`.
+
+On another distro (a Linux VM): the same packages plus `git`, `cmake` and `g++`, a clone with
+`--recurse-submodules`, and the same `cmake` commands. It needs Qt 6.4 and C++23 (g++ 14): Mint 22 and Ubuntu 24.04
+default to g++ 13, so `sudo apt install g++-14` and add `-DCMAKE_CXX_COMPILER=g++-14` (after a failed configure, remove
+the build directory: CMake keeps the compiler it found). Mint 21 and Ubuntu 22.04 (Qt 6.2, no g++ 14) can't build it.
+A binary built here needs Qt 6.10; CI's (Qt 6.4, glibc 2.39) runs on Mint 22, Ubuntu 24.04 and later, and Kali.
 
 CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14, libsystemd-dev and its Qt (6.4, so don't use newer
 Qt API without a check), LinSys (public) as a submodule; `Tests -Live` is the gate, `Tests Live` informational, with
