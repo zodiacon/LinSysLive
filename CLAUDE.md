@@ -9,11 +9,13 @@ this app's parts are named after them.
 ## Build
 
 CMake and Ninja, g++ 15, Qt 6.10 and libsystemd (sd-bus, for LinSys) from Ubuntu's packages (`qt6-base-dev`, `libsystemd-dev`, `ninja-build`, `pkgconf`: LinSys finds libsystemd with pkg-config), in WSL on the development machine; WSLg
-shows the window. From Windows:
+shows the window. `CMakePresets.json` has `debug` (in `build`) and `release` (in `build-release`), for configuring,
+building and testing (`ctest --preset debug`: `Tests -Live` and `Tests Live`); IDEs (VS Code's CMake Tools, Qt Creator,
+CLion) list them. Personal settings (another compiler) go in `CMakeUserPresets.json`, not committed. From Windows:
 
 ```powershell
-wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build -G Ninja && cmake --build build"   # Debug (the default)
-wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-release"
+wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake --preset debug && cmake --build --preset debug"       # in build
+wsl -e bash -c "cd /mnt/c/Dev/linsyslive && cmake --preset release && cmake --build --preset release"   # in build-release
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/Tests"        # Tests Live / Tests -Live, as WinSysLive's
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive"
 wsl -e bash -c "cd /mnt/c/Dev/linsyslive && ./build/linsyslive --tab 1 --screenshot /tmp/shot.png"
@@ -34,8 +36,10 @@ Root's settings are its own (`/root/.config`). To test without a password: `wsl 
 
 On another distro (a Linux VM): the same packages plus `git`, `cmake` and `g++`, a clone with
 `--recurse-submodules`, and the same `cmake` commands. It needs Qt 6.4 and C++23 (g++ 14): Mint 22 and Ubuntu 24.04
-default to g++ 13, so `sudo apt install g++-14` and add `-DCMAKE_CXX_COMPILER=g++-14` (after a failed configure, remove
-the build directory: CMake keeps the compiler it found). Mint 21 and Ubuntu 22.04 (Qt 6.2, no g++ 14) can't build it.
+default to g++ 13, so `sudo apt install g++-14` and add `-DCMAKE_CXX_COMPILER=g++-14` (or a `CMakeUserPresets.json` whose
+presets inherit `debug` and `release` with that cache variable; after a failed configure, remove the build directory:
+CMake keeps the compiler it found). Qt 6.4's CMake files report XKB not found unless `libxkbcommon-dev` is installed:
+harmless. Mint 21 and Ubuntu 22.04 (Qt 6.2, no g++ 14) can't build it.
 A binary built here needs Qt 6.10; CI's (Qt 6.4, glibc 2.39) runs on Mint 22, Ubuntu 24.04 and later, and Kali.
 
 CI (`.github/workflows/build.yml`): Debug and Release on Ubuntu 24.04 with g++ 14, libsystemd-dev and its Qt (6.4, so don't use newer
